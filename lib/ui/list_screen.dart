@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:listas/model/item.dart';
+import 'package:listas/ui/add_item.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({Key? key}) : super(key: key);
@@ -10,15 +11,7 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
 
-  List<Item> items = [
-    new Item(title: "Task 1"),
-    new Item(title: "Task 2"),
-    new Item(title: "Task 3"),
-    new Item(title: "Task 4"),
-    new Item(title: "Task 5"),
-    new Item(title: "Task 6"),
-  ]
-  ;
+  List<Item> items = [];
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +32,9 @@ class _ListScreenState extends State<ListScreen> {
             leading: CircleAvatar(
               backgroundColor: Colors.blueGrey,
               child: IconTheme(
-                child: Icon(Icons.done),
+                child: Icon(
+                  item.isDone ? Icons.done_all : Icons.done
+                ),
                 data: IconThemeData(
                   color: Colors.white
                 )
@@ -51,9 +46,33 @@ class _ListScreenState extends State<ListScreen> {
                 color: Colors.blueGrey
               ),
             ),
+            onTap: () {
+              setState(() {
+                items[index].isDone = !item.isDone;
+              });
+            },
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blueGrey,
+        child:  Icon(Icons.add),
+        onPressed: _addItem,
+      ),
     );
   }
+
+  void _addItem() async {
+    final item = await showDialog<Item>(
+        context: context,
+        builder: (BuildContext context) {
+          return new AddItem();
+        }
+    );
+
+    setState(() {
+      items.add(item!);
+    });
+  }
+
 }
