@@ -10,7 +10,6 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-
   List<Item> items = [];
 
   @override
@@ -21,42 +20,36 @@ class _ListScreenState extends State<ListScreen> {
         centerTitle: true,
         backgroundColor: Colors.blueGrey,
       ),
-      body: ListView.separated(
-        separatorBuilder: (context, index) => Divider(color: Colors.blueGrey),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView.separated(
+          separatorBuilder: (context, index) => Divider(color: Colors.blueGrey),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
 
-          final item = items[index];
-
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blueGrey,
-              child: IconTheme(
-                child: Icon(
-                  item.isDone ? Icons.done_all : Icons.done
-                ),
-                data: IconThemeData(
-                  color: Colors.white
-                )
-              )
-            ),
-            title: Text(
-              item.title,
-              style: TextStyle(
-                color: Colors.blueGrey
+            return ListTile(
+              leading: CircleAvatar(
+                  backgroundColor: Colors.blueGrey,
+                  child: IconTheme(
+                      child: Icon(item.isDone ? Icons.done_all : Icons.done),
+                      data: IconThemeData(color: Colors.white))),
+              title: Text(
+                item.title,
+                style: TextStyle(color: Colors.blueGrey),
               ),
-            ),
-            onTap: () {
-              setState(() {
-                items[index].isDone = !item.isDone;
-              });
-            },
-          );
-        },
+              onTap: () {
+                setState(() {
+                  items[index].isDone = !item.isDone;
+                });
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueGrey,
-        child:  Icon(Icons.add),
+        child: Icon(Icons.add),
         onPressed: _addItem,
       ),
     );
@@ -67,12 +60,24 @@ class _ListScreenState extends State<ListScreen> {
         context: context,
         builder: (BuildContext context) {
           return new AddItem();
-        }
-    );
+        });
 
     setState(() {
       items.add(item!);
     });
   }
 
+  Future<void> _refresh() async {
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      items.sort((a, b) {
+        if (a.isDone && !b.isDone)
+          return 1;
+        else if (!a.isDone && b.isDone) return -1;
+        return 0;
+      });
+    });
+
+    return Future.value();
+  }
 }
